@@ -5,56 +5,127 @@
   <title>Supply Chain Risk Tracker</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 min-h-screen flex flex-col items-center p-8">
-  <div class="w-full max-w-xl bg-white p-6 rounded-xl shadow-md space-y-6">
-    <h1 class="text-2xl font-bold text-center text-indigo-600">📦 Supply Chain Risk Tracker</h1>
+<body class="bg-gradient-to-tr from-indigo-100 via-white to-blue-100 min-h-screen flex items-center justify-center p-4">
+
+  <!-- Login Page -->
+  <div id="loginPage" class="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl space-y-6 animate-fade-in">
+    <h1 class="text-3xl font-bold text-center text-indigo-700">🔐 Team-Techies</h1>
+    <p class="text-center text-gray-500">Login to access your dashboard</p>
+    <form id="loginForm" class="space-y-4">
+      <input class="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-indigo-400" type="text" id="username" placeholder="Username" required />
+      <input class="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-indigo-400" type="password" id="password" placeholder="Password" required />
+      <button class="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition-all" type="submit">Login</button>
+    </form>
+  </div>
+
+  <!-- Main App -->
+  <div id="appPage" class="hidden w-full max-w-3xl bg-white p-8 rounded-2xl shadow-xl space-y-8 animate-fade-in">
+    <h1 class="text-3xl font-bold text-center text-indigo-700">📦 Supply Chain Risk Tracker</h1>
 
     <!-- Add Step Form -->
     <div>
-      <h2 class="text-xl font-semibold mb-2">➕ Add Supply Chain Step</h2>
-      <form id="stepForm" class="space-y-3">
-        <input class="w-full border p-2 rounded" type="text" id="productId" placeholder="Product ID" required />
-        <input class="w-full border p-2 rounded" type="text" id="supplierName" placeholder="Supplier Name" required />
-        <input class="w-full border p-2 rounded" type="text" id="location" placeholder="Location" required />
-        <input class="w-full border p-2 rounded" type="text" id="type" placeholder="Type (Farm, Factory...)" required />
-        <button class="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700" type="submit">Add Step</button>
+      <h2 class="text-2xl font-semibold text-gray-700 mb-4">➕ Add Supply Chain Step</h2>
+      <form id="stepForm" class="grid grid-cols-1 md:grid-cols-2 gap-4" enctype="multipart/form-data">
+        <input class="border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-indigo-400" type="text" id="productId" placeholder="Product ID" required />
+        <input class="border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-indigo-400" type="text" id="supplierName" placeholder="Supplier Name" required />
+        <input class="border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-indigo-400" type="text" id="location" placeholder="Location" required />
+        <input class="border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-indigo-400" type="text" id="type" placeholder="Type (Farm, Factory...)" required />
+        
+        <div class="col-span-full">
+          <label class="block text-gray-600 mb-1">📎 Upload Product Photo (Document):</label>
+          <input class="w-full border border-gray-300 p-3 rounded-lg" type="file" id="productFile" accept="image/*,.pdf,.doc,.docx" required />
+        </div>
+
+        <div class="col-span-full">
+          <label class="block text-gray-600 mb-1">📉 Risk Score (1 to 10):</label>
+          <input class="w-full" type="range" id="riskScore" min="1" max="10" value="5" />
+          <p class="text-sm text-gray-500 mt-1">Current: <span id="riskDisplay">5</span></p>
+        </div>
+
+        <div class="col-span-full">
+          <button class="w-full bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition-all" type="submit">Add Step</button>
+        </div>
       </form>
     </div>
 
-    <hr />
+    <hr class="border-gray-200" />
+<!-- About Section -->
+<div class="mt-6 p-4 border rounded-xl bg-gray-50">
+    <h2 class="text-xl font-semibold mb-3 text-indigo-600">📖 About This Project</h2>
+    <p>
+      The Supply Chain Risk Tracker is a project designed to help businesses and organizations track the journey of products
+      through the supply chain, from raw materials to finished goods. This tool allows users to add key supply chain steps,
+      identify potential risks at each stage, and assess the overall risk of the product.
+    </p>
+    <p class="mt-2">
+      By providing a clear and visual overview of the supply chain, the tool helps users identify possible disruptions, quality
+      control issues, and other factors that could impact product delivery and safety. It is aimed at helping companies
+      make more informed decisions to manage their supply chains effectively and mitigate risks.
+    </p>
+  </div>
 
+  <hr />
     <!-- View Steps -->
     <div>
-      <h2 class="text-xl font-semibold mb-2">🔍 View Product Journey</h2>
-      <div class="flex space-x-2 mb-2">
-        <input class="flex-1 border p-2 rounded" type="text" id="viewProductId" placeholder="Product ID" />
-        <button class="bg-green-600 text-white px-4 rounded hover:bg-green-700" onclick="fetchSteps()">View</button>
+      <h2 class="text-2xl font-semibold text-gray-700 mb-4">🔍 View Product Journey</h2>
+      <div class="flex flex-col sm:flex-row gap-4 mb-4">
+        <input class="flex-1 border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-green-400" type="text" id="viewProductId" placeholder="Enter Product ID" />
+        <button class="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-all" onclick="fetchSteps()">View</button>
       </div>
-      <ul id="stepsList" class="space-y-2"></ul>
+      <ul id="stepsList" class="space-y-4"></ul>
     </div>
   </div>
 
-  <!-- Scripts -->
   <script>
     const backendUrl = "http://localhost:3000";
+    const credentials = { username: "admin", password: "password123" };
 
+    // Update risk score display
+    document.getElementById("riskScore").addEventListener("input", function () {
+      document.getElementById("riskDisplay").textContent = this.value;
+    });
+
+    // Login logic
+    document.getElementById("loginForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+
+      if (username === credentials.username && password === credentials.password) {
+        document.getElementById("loginPage").classList.add("hidden");
+        document.getElementById("appPage").classList.remove("hidden");
+      } else {
+        alert("❌ Invalid credentials");
+      }
+    });
+
+    // Add Step form submission
     document.getElementById("stepForm").addEventListener("submit", async function (e) {
       e.preventDefault();
       const productId = document.getElementById("productId").value;
       const supplierName = document.getElementById("supplierName").value;
       const location = document.getElementById("location").value;
       const type = document.getElementById("type").value;
+      const riskScore = parseInt(document.getElementById("riskScore").value);
+      const fileInput = document.getElementById("productFile");
+
+      const formData = new FormData();
+      formData.append("supplierName", supplierName);
+      formData.append("location", location);
+      formData.append("type", type);
+      formData.append("riskScore", riskScore);
+      formData.append("file", fileInput.files[0]);
 
       const res = await fetch(`${backendUrl}/product/${productId}/step`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ supplierName, location, type }),
+        body: formData,
       });
 
       const data = await res.json();
       alert("✅ Step added! Risk Score: " + data.step.riskScore);
     });
 
+    // Fetch product steps
     async function fetchSteps() {
       const productId = document.getElementById("viewProductId").value;
       const res = await fetch(`${backendUrl}/product/${productId}`);
@@ -64,16 +135,33 @@
       stepsList.innerHTML = "";
 
       data.steps.forEach((step) => {
-        const color = step.riskScore >= 70 ? "bg-red-100 text-red-700 border-red-300"
-                    : step.riskScore >= 40 ? "bg-yellow-100 text-yellow-800 border-yellow-300"
-                    : "bg-green-100 text-green-800 border-green-300";
+        const risk = step.riskScore;
+        const color = risk >= 8
+          ? "bg-red-100 text-red-800 border-red-300"
+          : risk >= 5
+          ? "bg-yellow-100 text-yellow-800 border-yellow-300"
+          : "bg-green-100 text-green-800 border-green-300";
 
         const li = document.createElement("li");
-        li.className = `border rounded p-3 ${color}`;
-        li.innerText = `${step.supplierName} — ${step.location} — ${step.type} — Risk: ${step.riskScore}`;
+        li.className = `border-l-4 pl-4 py-3 rounded-lg ${color} shadow-sm`;
+        li.innerHTML = `
+          <div class="font-medium">${step.supplierName} (${step.type})</div>
+          <div class="text-sm">${step.location}</div>
+          <div class="text-sm font-semibold">Risk Score: ${step.riskScore}</div>
+        `;
         stepsList.appendChild(li);
       });
     }
   </script>
+
+  <style>
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fade-in 0.5s ease-out forwards;
+    }
+  </style>
 </body>
 </html>
