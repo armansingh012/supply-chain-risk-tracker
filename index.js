@@ -1,64 +1,66 @@
 const express = require("express");
 const cors = require("cors");
-const mongoose = require("mongoose");
+const multer = require("multer");
+const fs = require("fs");
+const path = require("path");
 
 const app = express();
-const PORT = 3000;
+const port = 3000;
 
 app.use(cors());
 app.use(express.json());
 
-// 1️⃣ MongoDB connection string (replace password/db name if needed)
-const mongoURI = "mongodb+srv://arman01:Arman01@supplychainapp.lxy0wfk.mongodb.net/?retryWrites=true&w=majority&appName=SupplyChainApp";
+// Make sure uploads folder exists
+const uploadDir = "uploads";
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
 
-mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log("✅ MongoDB Connected"))
-  .catch(err => console.error("❌ MongoDB Error:", err));
-
-// 2️⃣ Schema + Model
-const stepSchema = new mongoose.Schema({
-  productId: String,
-  supplierName: String,
-  location: String,
-  type: String,
-  timestamp: { type: Date, default: Date.now },
-  riskScore: Number,
+// Multer config
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadDir);
+  },
+  filename: function (req, file, cb) {
+    const unique = Date.now() + "-" + file.originalname;
+    cb(null, unique);
+  },
 });
+const upload = multer({ storage });
 
-const Step = mongoose.model("Step", stepSchema);
+// In-memory store
+const db = {};
 
-// 3️⃣ Risk score logic
-function getRiskScore(location, type) {
-  if (location.toLowerCase() === "bangladesh" && type.toLowerCase() === "factory") return 80;
-  if (location.toLowerCase() === "usa") return 20;
-  return 50;
-}
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// 4️⃣ Add a supply chain step (POST)
-app.post("/product/:id/step", async (req, res) => {
-  const productId = req.params.id;
-  const { supplierName, location, type } = req.body;
+app.post("/product/:productId/step", upload.single("file"), (req, res) => {
+  const { productId } = req.params;
+  const { supplierName, location, type, riskScore } = req.body;
+  const file = req.file;
 
-  const step = new Step({
-    productId,
+  if (!supplierName || !location || !type || !riskScore || !file) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  const step = {
     supplierName,
     location,
     type,
-    riskScore: getRiskScore(location, type),
-  });
+    riskScore: parseInt(riskScore),
+    file: file.filename,
+    time: new Date(),
+  };
 
-  await step.save();
-  res.json({ message: "Step added", step });
+  if (!db[productId]) db[productId] = [];
+  db[productId].push(step);
+
+  res.json({ message: "Step added!", step });
 });
 
-// 5️⃣ Get all steps of a product (GET)
-app.get("/product/:id", async (req, res) => {
-  const productId = req.params.id;
-  const steps = await Step.find({ productId });
-  res.json({ productId, steps });
+app.get("/product/:productId", (req, res) => {
+  const steps = db[req.params.productId] || [];
+  res.json({ steps });
 });
 
-// 6️⃣ Start the server
-app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+app.listen(port, () => {
+  console.log(`✅ Server running at http://localhost:${port}`);
 });
+
